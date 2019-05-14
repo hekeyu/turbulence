@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html> 
+	<head>
+		<meta charset="utf-8" />
+		<title>魔方</title> 
+	<style>  
+  	body{                        
+  		margin:0px;   
+  		overflow: hidden;
+  	}    
+  	canvas{                 
+  		margin:0px;
+  		position:absolute;      
+  	}        
+  	button{    
+  		margin:0px;
+  		position:fixed;  
+  		background-color: white;
+  	}   
+  </style> 
+	</head>
+<body>                           
+<script id = "planeVertex" type = "x-shader/x-vertex">
+	attribute vec3 a_Position;
+	uniform mat4 u_MvpMatrix;
+
+	varying vec3 v_Pos;
+	
+	void main(void){
+		
+		gl_Position = u_MvpMatrix * vec4(a_Position * 1.0, 1.0);
+	    v_Pos = a_Position;
+	}
+    
+</script>              
+ 
+<script id = "planeFragment" type = "x-shader/x-vertex">
+	#ifdef GL_ES               
+		precision highp float; 
+	#endif
+	uniform sampler2D u_Sampler;
+	uniform vec3 u_Eye;
+	uniform float u_Time;
+	varying vec3 v_Pos;                    
+	void main(void){  
+		vec2 pos = v_Pos.xy * 0.5 + 0.5;
+		float waveSize = 25.0;
+		float speed = 3.0;
+		vec3 light = vec3(0.0, 0.0, 1.0);
+		
+		float Z = sin(pos.x * pos.y * waveSize + speed * u_Time);
+vec3 N = normalize(vec3(
+	waveSize * pos.y * cos(pos.x * pos.y * waveSize + speed * u_Time),
+    waveSize * pos.x * cos(pos.x * pos.y * waveSize + speed * u_Time),
+    -1.0
+));
+       vec3 ray = refract(vec3(0.0, 0.0, -1.0), normalize(N), 1.0 / 1.0);
+       
+      float t = (4.0 - Z) / ray.z;
+      vec2 dog = v_Pos.xy + ray.xy * t; 
+    
+	   
+	  // gl_FragColor = vec4(dog.xy * 0.5 + 0.5,  0.0, 1.0);
+	  
+	   gl_FragColor = texture2D(u_Sampler, dog*0.3 + 0.5);
+	
+	}    
+</script>        
+                                            
+               
+<canvas id = "canvas"></canvas>
+<script src = "js/Matrix.js"></script>
+<script src = "js/3Dtest.js"></script>
+<script src = "js/Tool.js"></script>
+<script src = "js/main.js"></script>
+       
+</body>         
+</html>      
